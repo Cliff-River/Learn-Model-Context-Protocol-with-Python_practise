@@ -10,6 +10,7 @@ resolution-markers = [
 members = [
     "ch03-first-server",
     "ch04-sse-server",
+    "ch05-streamable-http",
     "practise",
 ]
 
@@ -146,6 +147,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=2.0.0" }]
+
+[[package]]
+name = "ch05-streamable-http"
+version = "0.1.0"
+source = { editable = "ch05_streamable_http" }
 
 [[package]]
 name = "click"
@@ -372,6 +378,12 @@ wheels = [
 name = "practise"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=2.0.0" }]
 
 [[package]]
 name = "pycparser"

@@ -1,0 +1,17 @@
+[project]
+name = "ch05-streamable-http"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Cliff", email = "hzf510920@163.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+ch05-streamable-http = "ch05_streamable_http:main"
+
+[build-system]
+requires = ["uv_build>=0.12.2,<0.13.0"]
+build-backend = "uv_build"
