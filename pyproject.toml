@@ -7,9 +7,7 @@ authors = [
     { name = "Cliff Huang", email = "hzf510920@163.com" }
 ]
 requires-python = ">=3.13"
-dependencies = [
-    "mcp[cli]>=2.0.0",
-]
+dependencies = []
 
 [project.scripts]
 practise = "practise:main"
