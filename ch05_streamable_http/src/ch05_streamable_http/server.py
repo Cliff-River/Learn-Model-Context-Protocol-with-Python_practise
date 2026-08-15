@@ -7,6 +7,7 @@ mcp = MCPServer("Streamable Server")
 
 @mcp.tool(description="A simple tool returning file content")
 async def echo(message : str, context : Context) -> str:
+    await context.info("I'm ready!")
     await context.info("Processing file 1/3")
     await asyncio.sleep(2)
     await context.report_progress(2, 3, "Processing file 2/3")

@@ -13,6 +13,16 @@ async def handle_message(
     if isinstance(message, Exception):
         print(f"Error: {message}")
 
+async def handle_progress(
+    progress: float,
+    total: float | None,
+    message: str | None,
+) -> None:
+    if total is not None:
+        print(f"Progress: {progress}/{total} message={message!r}")
+    else:
+        print(f"Progress: {progress} message={message!r}")
+
 # %%
 async def main() -> None:
     print("Strting client...")
@@ -31,7 +41,11 @@ async def main() -> None:
             await session.initialize()
 
             result = []
-            tool_result = await session.call_tool("echo", {"message": "Hello, World!"})
+            tool_result = await session.call_tool(
+                "echo",
+                {"message": "Hello, World!"},
+                progress_callback=handle_progress,
+            )
             result.append(tool_result)
             print("tool_result:", tool_result)
 
