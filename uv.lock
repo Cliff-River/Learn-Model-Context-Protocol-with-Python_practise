@@ -11,6 +11,7 @@ members = [
     "ch03-first-server",
     "ch04-sse-server",
     "ch05-streamable-http",
+    "ch06-advanced-servers",
     "practise",
 ]
 
@@ -170,6 +171,17 @@ requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=2.0.0" }]
 name = "ch05-streamable-http"
 version = "0.1.0"
 source = { editable = "ch05_streamable_http" }
+dependencies = [
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=2.0.0" }]
+
+[[package]]
+name = "ch06-advanced-servers"
+version = "0.1.0"
+source = { editable = "ch06_advanced_servers" }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
 ]

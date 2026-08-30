@@ -7,7 +7,9 @@ authors = [
     { name = "Eason Wong", email = "hzf510920@163.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "mcp[cli]>=2.0.0",
+]
 
 [project.scripts]
 ch06-advanced-servers = "ch06_advanced_servers:main"
