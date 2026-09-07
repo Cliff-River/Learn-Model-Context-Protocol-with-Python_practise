@@ -1,15 +1,13 @@
 # %% package
 from mcp.server.lowlevel import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
-from mcp.server.models import InitializationOptions
 from mcp.server.sse import SseServerTransport
 
-import tools
+import mcp_types as types
 
-# %%
+from .tools import tools
 
-server = Server("low-level server")
-
+# %% function to convert pydantic model to json schema
 def pydamtic_to_json(model_cls : type) -> dict:
     schema = model_cls.schema()
     properties = {}
@@ -22,3 +20,21 @@ def pydamtic_to_json(model_cls : type) -> dict:
         "required": required,
     }
 
+# %% list tools handler
+async def handle_list_tools(ctx, params):
+    tool_list = []
+    for tool_def in tools.values():
+        tool_list.append(types.Tool(
+            name=tool_def["name"],
+            description=tool_def["description"],
+            input_schema=pydamtic_to_json(tool_def["args_schema"]),
+        ))
+    return types.ListToolsResult(tools=tool_list)
+
+# %%
+
+
+# %% initialize server
+server = Server("low-level server", on_list_tools=handle_list_tools)
+
+# %%
