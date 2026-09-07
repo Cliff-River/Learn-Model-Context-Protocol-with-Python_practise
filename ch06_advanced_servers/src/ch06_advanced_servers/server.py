@@ -31,10 +31,26 @@ async def handle_list_tools(ctx, params):
         ))
     return types.ListToolsResult(tools=tool_list)
 
-# %%
-
-
 # %% initialize server
 server = Server("low-level server", on_list_tools=handle_list_tools)
+
+# %% call tool handler
+@server.call_tool()
+async def handle_call_tool(
+    name : str,
+    arguments : dict[str, str] | None,
+) -> list[types.TextContent]:
+    if name not in tools:
+        raise ValueError(f"Tool {name} not found")
+    
+    tool = tools[name]
+    result = "default"
+    try:
+        result = await tool["handler"](arguments)
+    except Exception as e:
+        raise ValueError(f"Error in tool {name}: {e}")
+    return [
+        types.TextContent(type="text", text=str(result)),
+    ]
 
 # %%
