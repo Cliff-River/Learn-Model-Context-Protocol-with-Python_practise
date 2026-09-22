@@ -1,19 +1,18 @@
 # %% package
-from mcp.server.lowlevel import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
+from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.requests import Request
+from starlette.responses import Response
 
 import mcp_types as types
-from starlette.responses import Response
 from starlette.routing import Mount, Route
 
 from .tools import tools
 
 # %% function to convert pydantic model to json schema
 def pydamtic_to_json(model_cls : type) -> dict:
-    schema = model_cls.schema()
+    schema = model_cls.model_json_schema()
     properties = {}
     required = schema.get("required", [])
     for proq, detail in schema.get("properties", {}).items():
@@ -35,80 +34,102 @@ async def handle_list_tools(ctx, params):
         ))
     return types.ListToolsResult(tools=tool_list)
 
-# %% initialize server
-server = Server("low-level server", on_list_tools=handle_list_tools)
-
 # %% call tool handler
-@server.call_tool()
 async def handle_call_tool(
-    name : str,
-    arguments : dict[str, str] | None,
-) -> list[types.TextContent]:
+    ctx,
+    params: types.CallToolRequestParams,
+) -> types.CallToolResult:
+    name = params.name
+    arguments = params.arguments
     if name not in tools:
         raise ValueError(f"Tool {name} not found")
-    
+
     tool = tools[name]
-    result = "default"
     try:
         result = await tool["handler"](arguments)
     except Exception as e:
         raise ValueError(f"Error in tool {name}: {e}")
-    return [
-        types.TextContent(type="text", text=str(result)),
-    ]
-
-# %%  list prompts handler
-@server.list_prompts()
-async def handle_list_prompts() -> list[types.Prompt]:
-    return [
-        types.Prompt(
-            name="Example-Prompt",
-            description="An example prompt",
-            arguments=[
-                types.PromptArgument(
-                    name="input",
-                    description="The input to the prompt",
-                    required=True,
-                ),
-            ]
-        ),
-    ]
-
-# %% get prompt handler
-@server.get_prompt()
-def handle_get_prompt(
-    name : str,
-    arguments : dict[str, str] | None,
-) -> types.GetPromptRequest:
-    if (name != "Example-Prompt"):
-        raise ValueError(f"Prompt {name} not found")
-    
-    return types.PromptMessage(
-        role="user",
-        content=types.TextContent(type="text", text=f"input: {arguments['input']}")
+    return types.CallToolResult(
+        content=[
+            types.TextContent(type="text", text=str(result)),
+        ],
     )
 
+# %%  list prompts handler
+async def handle_list_prompts(ctx, params) -> types.ListPromptsResult:
+    return types.ListPromptsResult(
+        prompts=[
+            types.Prompt(
+                name="Example-Prompt",
+                description="An example prompt",
+                arguments=[
+                    types.PromptArgument(
+                        name="input",
+                        description="The input to the prompt",
+                        required=True,
+                    ),
+                ]
+            ),
+        ]
+    )
+
+# %% get prompt handler
+async def handle_get_prompt(
+    ctx,
+    params: types.GetPromptRequestParams,
+) -> types.GetPromptResult:
+    if params.name != "Example-Prompt":
+        raise ValueError(f"Prompt {params.name} not found")
+
+    arguments = params.arguments or {}
+    return types.GetPromptResult(
+        messages=[
+            types.PromptMessage(
+                role="user",
+                content=types.TextContent(type="text", text=f"input: {arguments['input']}")
+            ),
+        ]
+    )
+
+# %% initialize server
+server = Server(
+    "low-level server",
+    on_list_tools=handle_list_tools,
+    on_call_tool=handle_call_tool,
+    on_list_prompts=handle_list_prompts,
+    on_get_prompt=handle_get_prompt,
+)
+
 # %% sse transport
-sse = SseServerTransport("")
+sse = SseServerTransport("/messages/")
 
 async def handle_sse(request: Request):
     async with sse.connect_sse(
-        request.scope, 
+        request.scope,
         request.receive,
-        request.send,
-    ) as stream:
-        await server.run(stream[0], stream[1], server.create_initialization_options())
+        request._send,
+    ) as streams:
+        read_stream, write_stream = streams
+        await server.run(
+            read_stream,
+            write_stream,
+            server.create_initialization_options(),
+        )
+    # Return empty response to avoid NoneType error on disconnect
     return Response()
 
 starlete_app = Starlette(
     debug=True,
     routes=[
         Route("/sse", handle_sse),
-        Mount("/messages", sse.handle),
+        Mount("/messages/", app=sse.handle_post_message),
     ],
 )
 
-# %% uvicorn
-import uvicorn
+def main() -> None:
+    import uvicorn
+    uvicorn.run(starlete_app, host="127.0.0.1", port=8000)
 
-uvicorn.run(starlete_app, host="127.0.0.1", port=8000)
+# %% run server
+if __name__ == "__main__":
+    main()
