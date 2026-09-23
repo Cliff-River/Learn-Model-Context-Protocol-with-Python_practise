@@ -87,7 +87,7 @@ async def handle_get_prompt(
         messages=[
             types.PromptMessage(
                 role="user",
-                content=types.TextContent(type="text", text=f"input: {arguments['input']}")
+                content=types.TextContent(type="text", text=f"Your input: {arguments['input']}")
             ),
         ]
     )
