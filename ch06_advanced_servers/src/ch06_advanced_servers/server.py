@@ -1,6 +1,7 @@
 # %% package
 from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
+from pydantic import BaseModel
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
@@ -11,7 +12,7 @@ from starlette.routing import Mount, Route
 from .tools import tools
 
 # %% function to convert pydantic model to json schema
-def pydamtic_to_json(model_cls : type) -> dict:
+def pydamtic_to_json(model_cls: type[BaseModel]) -> dict[str, object]:
     schema = model_cls.model_json_schema()
     properties = {}
     required = schema.get("required", [])
