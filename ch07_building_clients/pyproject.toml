@@ -9,11 +9,13 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "dotenv>=0.9.9",
+    "mcp>=2.0.0",
     "openai>=3.20.0",
 ]
 
 [project.scripts]
 ch07-building-clients = "ch07_building_clients:main"
+ch07-llm-with-functions = "ch07_building_clients.llm_with_functions:main"
 
 [build-system]
 requires = ["uv_build>=0.12.7,<0.13.0"]
