@@ -1,5 +1,5 @@
 # - flake8: noqa: B018
-# %% Import required modules
+# Import required modules
 import asyncio
 import json
 import os
@@ -18,12 +18,12 @@ client = AsyncOpenAI(
     api_key=OPENROUTER_API_KEY,
 )
 
-# %% Configuration
+# Configuration
 SERVER_URL = "http://127.0.0.1:8000/sse"
 MODEL = os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-27b:free")
 
 
-# %% Convert an MCP tool definition to the OpenAI function-calling format
+# Convert an MCP tool definition to the OpenAI function-calling format
 def mcp_tool_to_openai(tool) -> dict:
     return {
         "type": "function",
@@ -35,7 +35,7 @@ def mcp_tool_to_openai(tool) -> dict:
     }
 
 
-# %% Chat with the LLM, letting it call MCP tools when needed
+# Chat with the LLM, letting it call MCP tools when needed
 async def chat(query: str) -> str:
     # 1. connect to the MCP server through SSE transport
     async with sse_client(SERVER_URL) as (read_stream, write_stream):  # noqa: SIM117
@@ -101,7 +101,7 @@ async def chat(query: str) -> str:
                     )
 
 
-# %% entry point
+# entry point
 def main() -> None:
     query = "What is 123.45 plus 678.9?"
     print(f"User: {query}")
