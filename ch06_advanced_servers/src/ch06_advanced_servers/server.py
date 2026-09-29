@@ -1,15 +1,15 @@
 # %% package
+import mcp_types as types
 from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
 from pydantic import BaseModel
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
-
-import mcp_types as types
 from starlette.routing import Mount, Route
 
 from .tools import tools
+
 
 # %% function to convert pydantic model to json schema
 def pydamtic_to_json(model_cls: type[BaseModel]) -> dict[str, object]:
@@ -48,7 +48,7 @@ async def handle_call_tool(
     tool = tools[name]
     try:
         result = await tool["handler"](arguments)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise ValueError(f"Error in tool {name}: {e}")
     return types.CallToolResult(
         content=[
